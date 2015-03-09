@@ -178,18 +178,21 @@
     { $$ = class_($2,idtable.add_string("Object"),$4,
     stringtable.add_string(curr_filename)); }
     | CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
-    { $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); }
+    { $$ = class_($2,$4,$6,stringtable.add_string(curr_filename));} 
+    | CLASS TYPEID '{' error '}' ';' { yyclearin; $$ = NULL; }
+    | CLASS error '{' feature_list '}' ';' { yyclearin; $$ = NULL; }
+    | CLASS error '{' error '}' ';' { yyclearin; $$ = NULL; }
     ;
     
     /* Formals  */
-    formal 	: OBJECTID ':' TYPEID
-    { $$ = formal($1,$3);  };
-
     formals	: formal
     { $$ = single_Formals($1);  }
     | formals ',' formal
     { $$ = append_Formals($1, single_Formals($3));  }
     | { $$ = nil_Formals();  };    
+
+    formal 	: OBJECTID ':' TYPEID
+    { $$ = formal($1,$3);  };
 
     /* multiple expressions (separated by semicolons)  */
     expr_list		: expr ';'
@@ -203,7 +206,8 @@
     args_expr		: expr
     { $$ = single_Expressions($1);  }
     | args_expr ',' expr
-    { $$ = append_Expressions($1, single_Expressions($3));  };
+    { $$ = append_Expressions($1, single_Expressions($3));  }
+    | {$$ = nil_Experessions();};
 
  
     expr	:  OBJECTID ASSIGN expr ';'
@@ -292,14 +296,13 @@
     | cases case_branch 
     { $$ = append_Cases($1, single_Cases($2));  }
 
-    /*feature and features */ 
-    feature	: OBJECTID '(' formals ')' ':' TYPEID '{' expr '}' 
-    { $$ = method($1,$3,$6,$8);  }
-    | OBJECTID ':' TYPEID
-    { $$ = attr($1,$3,no_expr()); }
-    | OBJECTID ':' TYPEID ASSIGN expr
-    { $$ = attr($1,$3,$5);  };
 
+    /* Feature list may be empty, but no empty features in list. */
+    feature_list:	features	/* empty */
+    { $$ = $1; }
+    | { $$ = nil_Features();  };
+
+    /*feature and features */ 
     features	: feature ';' 
     { $$ = single_Features($1);  }
     | features feature ';'
@@ -307,11 +310,15 @@
     | error ';'
     { yyclearin; $$ = NULL;  }; 
 
-    /* Feature list may be empty, but no empty features in list. */
-    feature_list:	features	/* empty */
-    { $$ = $1; }
-    | { $$ = nil_Features();  };
+    feature	: OBJECTID '(' formals ')' ':' TYPEID '{' expr '}' 
+    { $$ = method($1,$3,$6,$8);  }
+    | OBJECTID ':' TYPEID
+    { $$ = attr($1,$3,no_expr()); }
+    | OBJECTID ':' TYPEID ASSIGN expr
+    { $$ = attr($1,$3,$5);  };
+
     
+        
     
     /* end of grammar */
     %%
