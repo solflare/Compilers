@@ -182,7 +182,8 @@
     | CLASS TYPEID '{' error '}' ';' { yyclearin; $$ = NULL; }
     | CLASS error '{' feature_list '}' ';' { yyclearin; $$ = NULL; }
     | CLASS error '{' error '}' ';' { yyclearin; $$ = NULL; }
-    ;
+    | CLASS error
+    | error;
     
     /* Formals  */
     formals	: formal
@@ -288,7 +289,7 @@
     | error ',' let_expr { yyclearin; $$ = NULL; };
  
     /*case and cases */
-    case_branch 	:  OBJECTID ':' TYPEID DARROW expr
+    case_branch 	:  OBJECTID ':' TYPEID DARROW expr ';'
     { $$ = branch($1,$3,$5);   };
 
     cases	:  case_branch
@@ -300,7 +301,8 @@
     /* Feature list may be empty, but no empty features in list. */
     feature_list:	features	/* empty */
     { $$ = $1; }
-    | { $$ = nil_Features();  };
+    | { $$ = nil_Features();  }
+    | error ;
 
     /*feature and features */ 
     features	: feature ';' 
@@ -315,7 +317,8 @@
     | OBJECTID ':' TYPEID
     { $$ = attr($1,$3,no_expr()); }
     | OBJECTID ':' TYPEID ASSIGN expr
-    { $$ = attr($1,$3,$5);  };
+    { $$ = attr($1,$3,$5);  }
+    | error;
 
     
         
