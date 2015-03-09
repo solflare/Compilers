@@ -207,20 +207,20 @@
     { $$ = single_Expressions($1);  }
     | args_expr ',' expr
     { $$ = append_Expressions($1, single_Expressions($3));  }
-    | {$$ = nil_Experessions();};
+    | {$$ = nil_Expressions();};
 
  
-    expr	:  OBJECTID ASSIGN expr ';'
+    expr	:  OBJECTID ASSIGN expr 
     { $$ = assign($1,$3); }
 
     /* Operators */ 
-    | expr '+' expr ';' 
+    | expr '+' expr  
     { $$ = plus($1,$3); }
-    | expr '-' expr ';'
+    | expr '-' expr 
     { $$ = sub($1,$3);  }
-    | expr '*' expr ';' 
+    | expr '*' expr  
     { $$ = mul($1,$3);  }
-    | expr '/' expr ';'
+    | expr '/' expr 
     { $$ = divide($1,$3); }
     | expr '<' expr 
     { $$ = lt($1,$3);  }
